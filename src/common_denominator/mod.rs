@@ -15,6 +15,7 @@ use std::fmt::{ self , Display, Formatter};
 /// * TODO I'm not sure beyond this
 
 // TODO Impl mathematical ops: https://doc.rust-lang.org/rust-by-example/trait/ops.html
+// TODO Impl ordering in terms of denominator: https://www.philipdaniels.com/blog/2019/rust-equality-and-ordering/
 struct Fraction {
     num: i64,
     den: i64,
@@ -50,9 +51,38 @@ pub fn convert_fracts(l: Vec<(i64, i64)>) -> Vec<(i64, i64)> {
     Vec::new()
 }
 
-fn quicksort(nums: Vec<i64>) -> Vec<i64> {
-    todo!("Implement quicksort first to see how that can map to a Vec<Fraction>");
-    Vec::new()
+/// Mostly used https://en.wikipedia.org/wiki/Quicksort for reference of the
+/// Lomuto partition scheme. I want to try to implement:
+/// TODO Random pivot instead of the last element
+/// TODO With slices instead of a vector even though a vector makes more sense for my use case.
+/// TODO take a vector and return another for learning purposes
+fn quicksort(nums: &mut Vec<i64>, low: usize, high: usize) {
+    if low < high {
+        let part = partition(nums, low, high);
+        quicksort(nums, low, part-1);
+        // TODO are we doing part - 1 and part + 1 because the part is the right position?
+        quicksort(nums, part + 1, high);
+    }
+}
+
+fn partition(nums: &mut Vec<i64>, low: usize, high: usize) -> usize {
+    let pivot = nums[high];
+    let mut i = low;
+
+    for j in low..high {
+        if nums[j] <= pivot {
+            swap(nums, i, j);
+            i += 1
+        }
+    }
+    swap(nums, i, high);
+    i
+}
+
+fn swap(arr: &mut Vec<i64>, i: usize, j: usize) {
+    let temp = arr[i];
+    arr[i] = arr[j];
+    arr[j] = temp;
 }
 
 #[cfg(test)]
@@ -74,9 +104,26 @@ mod test {
 
     #[test]
     fn quicksort_sorts_list_of_nums() {
-        let nums = vec![9, 4, 1, 3];
-        let sorted = quicksort(nums);
-        assert_eq!(sorted, vec![1, 3, 4, 9]);
+        let mut nums = vec![9, 4, 1, 3];
+        let length = nums.len();
+        quicksort(&mut nums, 0usize, length - 1);
+        assert_eq!(nums, vec![1, 3, 4, 9]);
+    }
+
+    #[test]
+    fn quicksort_sorts_list_of_repeating_nums() {
+        let mut nums = vec![9, 4, 1, 3, 1, 1];
+        let length = nums.len();
+        quicksort(&mut nums, 0usize, length - 1);
+        assert_eq!(nums, vec![1, 1, 1, 3, 4, 9]);
+    }
+
+    #[test]
+    fn quicksort_sorts_list_of_more_repeating_nums() {
+        let mut nums = vec![9, 4, 1, 3, 1, 1, 9, 4, 1, 3];
+        let length = nums.len();
+        quicksort(&mut nums, 0usize, length - 1);
+        assert_eq!(nums, vec![1, 1, 1, 1, 3, 3, 4, 4, 9, 9]);
     }
 
     #[test]
