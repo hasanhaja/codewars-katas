@@ -68,14 +68,16 @@ fn quicksort(nums: &mut Vec<i64>, low: usize, high: usize) {
 fn partition(nums: &mut Vec<i64>, low: usize, high: usize) -> usize {
     let pivot = nums[high];
     let mut i = low;
-
+    println!("Entering partition as: {:?}", nums);
     for j in low..high {
+        println!("{:?}", nums);
         if nums[j] <= pivot {
             swap(nums, i, j);
             i += 1
         }
     }
     swap(nums, i, high);
+    println!("Leaving partition as: {:?}", nums);
     i
 }
 
